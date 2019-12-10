@@ -178,6 +178,7 @@ class BezierChartState extends State<BezierChart>
   BezierChartScale _currentBezierChartScale;
 
   double _lastValueSnapped = double.infinity;
+
   bool get isPinchZoomActive => (_touchFingers > 1 && widget.config.pinchZoom);
 
   ///When we only have 1 axis we don't need to much span to change the date type chart`
@@ -237,7 +238,7 @@ class BezierChartState extends State<BezierChart>
   }
 
   ///Hide the vertical/bubble indicator and refresh the widget
-  _onHideIndicator() {
+  _onHideIndicator([nj]) {
     if (_displayIndicator) {
       if (widget.onIndicatorVisible != null) {
         widget.onIndicatorVisible(false);
@@ -538,12 +539,13 @@ class BezierChartState extends State<BezierChart>
           valueMap = tmpMap.map((k, v) => MapEntry(k, v.length.toDouble()));
         } else if (widget.bezierChartAggregation ==
             BezierChartAggregation.MAX) {
-          valueMap = tmpMap.map((k, v) => MapEntry(k, v.reduce((c1, c2) => c1 > c2 ? c1 : c2)));
+          valueMap = tmpMap.map(
+              (k, v) => MapEntry(k, v.reduce((c1, c2) => c1 > c2 ? c1 : c2)));
         } else if (widget.bezierChartAggregation ==
             BezierChartAggregation.MIN) {
-          valueMap = tmpMap.map((k, v) => MapEntry(k, v.reduce((c1, c2) => c1 < c2 ? c1 : c2)));
+          valueMap = tmpMap.map(
+              (k, v) => MapEntry(k, v.reduce((c1, c2) => c1 < c2 ? c1 : c2)));
         }
-
 
         List<DataPoint<DateTime>> newDataPoints = [];
         valueMap.keys.forEach(
@@ -794,8 +796,11 @@ class BezierChartState extends State<BezierChart>
           }
         },
         child: GestureDetector(
-          onLongPressStart: isPinchZoomActive ? null : _onDisplayIndicator,
-          onLongPressMoveUpdate: isPinchZoomActive ? null : _refreshPosition,
+//          onLongPressStart: isPinchZoomActive ? null : _onDisplayIndicator,
+//          onLongPressMoveUpdate: isPinchZoomActive ? null : _refreshPosition,
+          onTapDown: isPinchZoomActive ? null : _onDisplayIndicator,
+          onTapUp: isPinchZoomActive ? null : _onHideIndicator,
+          onTapCancel: isPinchZoomActive ? null : _onHideIndicator,
           onScaleStart: (_) {
             _previousScale = _currentScale;
           },
@@ -805,7 +810,7 @@ class BezierChartState extends State<BezierChart>
                   !_displayIndicator
               ? (details) => _onPinchZoom(_previousScale * details.scale)
               : null,
-          onTap: isPinchZoomActive ? null : _onHideIndicator,
+//          onTap: isPinchZoomActive ? null : _onHideIndicator,
           child: LayoutBuilder(
             builder: (context, constraints) {
               _contentWidth = _buildContentWidth(constraints);
@@ -1604,6 +1609,7 @@ class _BezierChartPainter extends CustomPainter {
 class _AxisValue {
   final double x;
   final double y;
+
   const _AxisValue({
     this.x,
     this.y,
